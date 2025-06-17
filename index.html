@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>포커 메모장</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { height: 100%; font-family: sans-serif; background: #121212; color: white; }
+
+    #onboarding {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: black;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      z-index: 9999;
+    }
+
+    #mainApp {
+      display: none;
+      padding-bottom: 70px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #1f1f1f;
+      font-size: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar button {
+      font-size: 1.4rem;
+      background: none;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .entry {
+      background: #1e1e1e;
+      padding: 10px;
+      margin: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      white-space: pre-line;
+    }
+
+    #memoList {
+      padding-bottom: 30px;
+    }
+
+    #emptyMessage {
+      text-align: center;
+      color: #777;
+      margin-top: 30px;
+      font-size: 1.1rem;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: #1f1f1f;
+      border-top: 1px solid #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .add-button {
+      background: #0077ff;
+      color: white;
+      font-size: 2rem;
+      padding: 0.3em 0.75em;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    #memoInputArea {
+      display: none;
+      padding: 16px;
+    }
+
+    .form-section {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-section label {
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    select, input, textarea {
+      padding: 10px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #1e1e1e;
+      color: white;
+    }
+
+    #saveBtn {
+      margin-top: 8px;
+      padding: 10px;
+      font-size: 1rem;
+      width: 100%;
+      background: #00aaff;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 온보딩 -->
+  <div id="onboarding">🃏 포커 메모장</div>
+
+  <!-- 메인 앱 -->
+  <div id="mainApp">
+    <div class="topbar">
+      <span>포커 메모장</span>
+      <button onclick="toggleFullScreen()">⛶</button>
+    </div>
+
+<!-- 입력 폼 -->
+<<div id="memoInputArea">
+    <!-- 1~9 기본 게임 정보 -->
+    <div class="form-section"><label>TYPE</label>
+      <select id="type"><option>Cash Game</option><option>Tournament</option></select>
+    </div>
+    <div class="form-section"><label>TABLE SIZE</label>
+      <select id="tableSize"><option>Full-Ring</option><option>6-Max</option><option>Heads-Up</option></select>
+    </div>
+    <div class="form-section"><label>START</label>
+      <input type="datetime-local" id="startTime">
+    </div>
+    <div class="form-section"><label>END</label>
+      <input type="datetime-local" id="endTime">
+    </div>
+    <div class="form-section"><label>LOCATION</label>
+      <input type="text" id="location" placeholder="Ex: Walkerhill">
+    </div>
+    <div class="form-section"><label>ROOM</label>
+      <select id="room"><option>Home Game</option><option>Casino</option><option>Online</option></select>
+    </div>
+    <div class="form-section"><label>CURRENCY</label>
+      <select id="currency"><option>USD $</option><option>KRW ₩</option><option>EUR €</option></select>
+    </div>
+    <div class="form-section"><label>GAME</label>
+      <input type="text" id="gameType" placeholder="Ex: NLH, PLO">
+    </div>
+    <div class="form-section"><label>LIMIT</label>
+      <select id="limit"><option>No Limit</option><option>Pot Limit</option><option>Fixed Limit</option></select>
+    </div>
+  
+    <!-- 10~13 블라인드 구조 -->
+    <div class="form-section"><label>SMALL BLIND</label>
+      <input type="number" id="smallBlind" placeholder="예: 1">
+    </div>
+    <div class="form-section"><label>BIG BLIND</label>
+      <input type="number" id="bigBlind" placeholder="예: 2">
+    </div>
+    <div class="form-section"><label>3RD BLIND</label>
+      <input type="number" id="thirdBlind" placeholder="선택사항">
+    </div>
+    <div class="form-section"><label>ANTE</label>
+      <input type="number" id="ante" placeholder="선택사항">
+    </div>
+  
+    <!-- 14~19 금전 관련 -->
+    <div class="form-section"><label>BUY-IN</label>
+      <input type="number" id="buyIn" placeholder="예: 100">
+    </div>
+    <div class="form-section"><label>CASH-OUT</label>
+      <input type="number" id="cashOut" placeholder="예: 250">
+    </div>
+    <div class="form-section"><label>NUMBER OF REBUYS</label>
+      <input type="number" id="rebuys">
+    </div>
+    <div class="form-section"><label>REBUY TOTAL COSTS</label>
+      <input type="number" id="rebuyCost">
+    </div>
+    <div class="form-section"><label>EXPENSES</label>
+      <input type="number" id="expenses" placeholder="예: 20">
+    </div>
+    <div class="form-section"><label>EXPENSES IN CHIPS (TIP)</label>
+      <input type="number" id="chipExpenses">
+    </div>
+  
+    <!-- 20~22 기타 -->
+    <div class="form-section"><label>BREAKS IN MINUTES</label>
+      <input type="number" id="breaks">
+    </div>
+    <div class="form-section"><label>HANDS PER HOUR</label>
+      <input type="number" id="handsPerHour">
+    </div>
+    <div class="form-section"><label>STAKING</label>
+      <select id="staking">
+        <option>No shares bought/sold</option>
+        <option>Shares sold</option>
+        <option>Shares bought</option>
+      </select>
+    </div>
+  
+    <!-- 메모 + 태그 -->
+    <div class="form-section"><label>SESSION NOTE</label>
+      <textarea id="memoNote" rows="4" placeholder="기억하고 싶은 핸드/상황 메모..."></textarea>
+    </div>
+    <div class="form-section"><label>TAGS</label>
+      <input type="text" id="tags" placeholder="예: longsession, tilt, finaltable">
+    </div>
+  
+    <!-- 저장 버튼 -->
+    <button id="saveBtn" onclick="saveMemo()">✓ SAVE</button>
+  </div>
+  
+
+    <!-- 메모 리스트 -->
+    <div id="memoList">
+      <div id="emptyMessage">메모가 없어요 🥲</div>
+    </div>
+  </div>
+
+  <!-- 하단 네비 -->
+  <div class="bottom-nav">
+    <button class="add-button" onclick="toggleMemoInput()">+</button>
+  </div>
+
+  <!-- 상세보기 모달 -->
+<div id="detailModal" style="
+display: none;
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+background: rgba(0,0,0,0.8);
+color: white;
+padding: 40px 20px;
+z-index: 9999;
+overflow-y: auto;
+">
+<div style="max-width: 600px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 10px;">
+  <h2>📝 세션 상세 정보</h2>
+  <pre id="modalContent" style="white-space: pre-wrap; font-size: 0.95rem; margin-top: 10px;"></pre>
+  <!-- 감정 아이콘 버튼 -->
+<!-- 현재 감정 이모지 -->
+<div style="position: relative; margin-top: 20px; text-align: right;">
+  <div id="emojiDisplay" 
+     style="
+       font-size: 6rem;         /* 👈 엄청 큼 */
+       cursor: pointer;
+       position: fixed;
+       bottom: 40px;
+       right: 20px;
+       z-index: 99999;
+     "
+     onmousedown="startHoldEmoji()" 
+     onmouseup="cancelHoldEmoji()" 
+     ontouchstart="startHoldEmoji()" 
+     ontouchend="cancelHoldEmoji()">
+  🧐
+</div>
+
+  <!-- 감정 선택 팝업 -->
+  <div id="emojiPicker" style="
+    display: none;
+    position: absolute;
+    bottom: 50px;
+    right: 0;
+    background: #1e1e1e;
+    padding: 8px 12px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  ">
+    <span onclick="selectEmoji('😡')">😡</span>
+    <span onclick="selectEmoji('😏')">😏</span>
+    <span onclick="selectEmoji('🥶')">🥶</span>
+    <span onclick="selectEmoji('🙏')">🙏</span>
+    <span onclick="selectEmoji('🤑')">🤑</span>
+  </div>
+</div>
+
+
+  <button onclick="closeModal()" style="margin-top: 20px; padding: 10px 20px; font-size: 1rem; background: #0077ff; color: white; border: none; border-radius: 6px;">닫기</button>
+</div>
+</div>
+
+
+<script>
+  // 온보딩 제거
+  setTimeout(() => {
+    document.getElementById('onboarding').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+  }, 1500);
+
+  // 전체화면 전환
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  // 메모 입력창 토글
+  function toggleMemoInput() {
+    const area = document.getElementById('memoInputArea');
+    area.style.display = area.style.display === 'block' ? 'none' : 'block';
+  }
+
+  // 메모 저장
+  function saveMemo() {
+    const get = (id) => document.getElementById(id)?.value || '';
+
+    const type = get('type');
+    const tableSize = get('tableSize');
+    const start = get('startTime');
+    const end = get('endTime');
+    const location = get('location');
+    const room = get('room');
+    const currency = get('currency');
+    const gameType = get('gameType');
+    const limit = get('limit');
+    const smallBlind = get('smallBlind');
+    const bigBlind = get('bigBlind');
+    const thirdBlind = get('thirdBlind');
+    const ante = get('ante');
+    const buyIn = get('buyIn');
+    const cashOut = get('cashOut');
+    const rebuys = get('rebuys');
+    const rebuyCost = get('rebuyCost');
+    const expenses = get('expenses');
+    const chipExpenses = get('chipExpenses');
+    const breaks = get('breaks');
+    const handsPerHour = get('handsPerHour');
+    const staking = get('staking');
+    const note = get('memoNote');
+    const tags = get('tags');
+
+    if (!note || !buyIn) {
+      alert("BUY-IN과 NOTE는 필수입니다!");
+      return;
+    }
+
+    const now = new Date();
+    const formatted = `${now.getFullYear()}.${(now.getMonth()+1).toString().padStart(2,'0')}.${now.getDate().toString().padStart(2,'0')} ${now.toLocaleTimeString()}`;
+
+    const list = document.getElementById('memoList');
+    const empty = document.getElementById('emptyMessage');
+
+    const div = document.createElement('div');
+    div.className = 'entry';
+    div.innerText = `📌 [${formatted}] – ${type}`;
+
+    const fullDetail = `
+📌 [${formatted}]
+🎮 TYPE: ${type} | 🪑 TABLE: ${tableSize}
+🏁 ${start} ~ ${end}
+📍 LOCATION: ${location} | 🏠 ROOM: ${room}
+💲 CURRENCY: ${currency} | GAME: ${gameType} (${limit})
+💸 BLINDS: ${smallBlind}/${bigBlind}${thirdBlind ? '/' + thirdBlind : ''} ANTE: ${ante}
+💰 BUY-IN: $${buyIn} | CASH-OUT: $${cashOut}
+♻️ REBUYS: ${rebuys} (TOTAL: $${rebuyCost})
+🧾 EXPENSES: $${expenses} | TIP: $${chipExpenses}
+⏱️ BREAKS: ${breaks}m | HPH: ${handsPerHour}
+🤝 STAKING: ${staking}
+📝 NOTE: ${note}
+🏷️ TAGS: ${tags}`.trim();
+
+    div.dataset.detail = fullDetail;
+    div.onclick = () => openModal(fullDetail);
+
+    addDeleteHandler(div);
+    list.prepend(div);
+
+    if (empty) empty.remove();
+    toggleMemoInput();
+  }
+
+  // 상세 모달 열기
+  function openModal(content) {
+    document.getElementById('modalContent').innerText = content;
+    document.getElementById('detailModal').style.display = 'block';
+  }
+
+  function selectEmoji(emoji) {
+  alert(`오늘의 감정 선택: ${emoji}`);
+  // 추후: localStorage에 저장 or note에 추가 가능
+}
+  // 상세 모달 닫기
+  function closeModal() {
+    document.getElementById('detailModal').style.display = 'none';
+  }
+
+  // 삭제 기능 (우클릭 / 꾹누르기)
+  function addDeleteHandler(entry) {
+    entry.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      if (document.fullscreenElement) {
+        alert("전체화면에선 삭제 불가. 전체화면을 종료해 주세요.");
+        return;
+      }
+      if (confirm("삭제할까요?")) {
+        entry.remove();
+        checkEmpty();
+      }
+    });
+
+    let timer;
+    entry.addEventListener('touchstart', () => {
+      timer = setTimeout(() => {
+        if (confirm("삭제할까요?")) {
+          entry.remove();
+          checkEmpty();
+        }
+      }, 800);
+    });
+    entry.addEventListener('touchend', () => clearTimeout(timer));
+  }
+
+  // 리스트 비었을 때 메시지 표시
+  function checkEmpty() {
+    const list = document.getElementById('memoList');
+    if (list.querySelectorAll('.entry').length === 0) {
+      const msg = document.createElement('div');
+      msg.id = 'emptyMessage';
+      msg.innerText = '메모가 없어요 🥲';
+      msg.style.textAlign = 'center';
+      msg.style.color = '#777';
+      msg.style.marginTop = '30px';
+      msg.style.fontSize = '1.1rem';
+      list.appendChild(msg);
+    }
+  }
+
+  let holdTimer;
+
+// 꾹 누르기 시작
+function startHoldEmoji() {
+  holdTimer = setTimeout(() => {
+    document.getElementById('emojiPicker').style.display = 'block';
+  }, 600); // 0.6초 이상 눌러야 감정 선택 팝업 열림
+}
+
+// 꾹 누르기 취소
+function cancelHoldEmoji() {
+  clearTimeout(holdTimer);
+}
+
+// 감정 선택 시 표시
+function selectEmoji(emoji) {
+  document.getElementById('emojiDisplay').innerText = emoji;
+  document.getElementById('emojiPicker').style.display = 'none';
+}
+</script>
+
+  
+  
+
+</body>
+</html>

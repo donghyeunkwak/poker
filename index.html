@@ -141,98 +141,32 @@
       <button onclick="toggleFullScreen()">⛶</button>
     </div>
 
-<!-- 입력 폼 -->
-<div id="memoInputArea">
-    <!-- 1~9 기본 게임 정보 -->
-    <div class="form-section"><label>TYPE</label>
-      <select id="type"><option>Cash Game</option><option>Tournament</option></select>
+    <!-- 입력 영역 -->
+    <div id="memoInputArea">
+      <!-- STEP 0: TYPE 선택 -->
+      <div class="form-section" id="typeStep">
+        <label>TYPE</label>
+        <select id="typeSelect" onchange="onTypeChosen()">
+          <option value="">선택하세요</option>
+          <option value="tournament">Tournament</option>
+        </select>
+      </div>
+
+      <!-- STEP 1: 토너먼트 입력 -->
+      <div id="tournamentForm" style="display: none;">
+        <div class="form-section"><label>날짜</label><input type="date" id="tDate"></div>
+        <div class="form-section"><label>토너먼트 이름 / Buy-in</label><input type="text" id="tName"></div>
+        <div class="form-section"><label>Total Entries</label><input type="number" id="tEntries"></div>
+        <div class="form-section"><label>Players Remaining (%)</label><input type="number" id="tRemaining"></div>
+        <div class="form-section"><label>In The Money (ITM)</label>
+          <select id="tITM"><option>Yes</option><option>No</option></select>
+        </div>
+        <div class="form-section"><label>Blind Level</label><input type="text" id="tBlind" placeholder="예: 1,000 / 2,000 / 250"></div>
+        <div class="form-section"><label>Antes</label><input type="number" id="tAntes"></div>
+        <div class="form-section"><label>My Stack (BB)</label><input type="number" id="tStack"></div>
+        <button onclick="saveTournamentMemo()">✓ 저장</button>
+      </div>
     </div>
-    <div class="form-section"><label>TABLE SIZE</label>
-      <select id="tableSize"><option>Full-Ring</option><option>6-Max</option><option>Heads-Up</option></select>
-    </div>
-    <div class="form-section"><label>START</label>
-      <input type="datetime-local" id="startTime">
-    </div>
-    <div class="form-section"><label>END</label>
-      <input type="datetime-local" id="endTime">
-    </div>
-    <div class="form-section"><label>LOCATION</label>
-      <input type="text" id="location" placeholder="Ex: Walkerhill">
-    </div>
-    <div class="form-section"><label>ROOM</label>
-      <select id="room"><option>Home Game</option><option>Casino</option><option>Online</option></select>
-    </div>
-    <div class="form-section"><label>CURRENCY</label>
-      <select id="currency"><option>USD $</option><option>KRW ₩</option><option>EUR €</option></select>
-    </div>
-    <div class="form-section"><label>GAME</label>
-      <input type="text" id="gameType" placeholder="Ex: NLH, PLO">
-    </div>
-    <div class="form-section"><label>LIMIT</label>
-      <select id="limit"><option>No Limit</option><option>Pot Limit</option><option>Fixed Limit</option></select>
-    </div>
-  
-    <!-- 10~13 블라인드 구조 -->
-    <div class="form-section"><label>SMALL BLIND</label>
-      <input type="number" id="smallBlind" placeholder="예: 1">
-    </div>
-    <div class="form-section"><label>BIG BLIND</label>
-      <input type="number" id="bigBlind" placeholder="예: 2">
-    </div>
-    <div class="form-section"><label>3RD BLIND</label>
-      <input type="number" id="thirdBlind" placeholder="선택사항">
-    </div>
-    <div class="form-section"><label>ANTE</label>
-      <input type="number" id="ante" placeholder="선택사항">
-    </div>
-  
-    <!-- 14~19 금전 관련 -->
-    <div class="form-section"><label>BUY-IN</label>
-      <input type="number" id="buyIn" placeholder="예: 100">
-    </div>
-    <div class="form-section"><label>CASH-OUT</label>
-      <input type="number" id="cashOut" placeholder="예: 250">
-    </div>
-    <div class="form-section"><label>NUMBER OF REBUYS</label>
-      <input type="number" id="rebuys">
-    </div>
-    <div class="form-section"><label>REBUY TOTAL COSTS</label>
-      <input type="number" id="rebuyCost">
-    </div>
-    <div class="form-section"><label>EXPENSES</label>
-      <input type="number" id="expenses" placeholder="예: 20">
-    </div>
-    <div class="form-section"><label>EXPENSES IN CHIPS (TIP)</label>
-      <input type="number" id="chipExpenses">
-    </div>
-  
-    <!-- 20~22 기타 -->
-    <div class="form-section"><label>BREAKS IN MINUTES</label>
-      <input type="number" id="breaks">
-    </div>
-    <div class="form-section"><label>HANDS PER HOUR</label>
-      <input type="number" id="handsPerHour">
-    </div>
-    <div class="form-section"><label>STAKING</label>
-      <select id="staking">
-        <option>No shares bought/sold</option>
-        <option>Shares sold</option>
-        <option>Shares bought</option>
-      </select>
-    </div>
-  
-    <!-- 메모 + 태그 -->
-    <div class="form-section"><label>SESSION NOTE</label>
-      <textarea id="memoNote" rows="4" placeholder="기억하고 싶은 핸드/상황 메모..."></textarea>
-    </div>
-    <div class="form-section"><label>TAGS</label>
-      <input type="text" id="tags" placeholder="예: longsession, tilt, finaltable">
-    </div>
-  
-    <!-- 저장 버튼 -->
-    <button id="saveBtn" onclick="saveMemo()">✓ SAVE</button>
-  </div>
-  
 
     <!-- 메모 리스트 -->
     <div id="memoList">
@@ -246,234 +180,181 @@
   </div>
 
   <!-- 상세보기 모달 -->
-<div id="detailModal" style="
-display: none;
-position: fixed;
-top: 0; left: 0;
-width: 100%; height: 100%;
-background: rgba(0,0,0,0.8);
-color: white;
-padding: 40px 20px;
-z-index: 9999;
-overflow-y: auto;
-">
-<div style="max-width: 600px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 10px;">
-  <h2>📝 세션 상세 정보</h2>
-  <pre id="modalContent" style="white-space: pre-wrap; font-size: 0.95rem; margin-top: 10px;"></pre>
-  <!-- 감정 아이콘 버튼 -->
-<!-- 현재 감정 이모지 -->
-<div style="position: relative; margin-top: 20px; text-align: right;">
-  <div id="emojiDisplay" 
-     style="
-       font-size: 6rem;         /* 👈 엄청 큼 */
-       cursor: pointer;
-       position: fixed;
-       bottom: 40px;
-       right: 20px;
-       z-index: 99999;
-     "
-     onmousedown="startHoldEmoji()" 
-     onmouseup="cancelHoldEmoji()" 
-     ontouchstart="startHoldEmoji()" 
-     ontouchend="cancelHoldEmoji()">
-  🧐
-</div>
+  <div id="detailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; padding: 40px 20px; z-index: 9999; overflow-y: auto;">
+    <div style="max-width: 600px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 10px;">
+      <h2>📝 세션 상세 정보</h2>
+      <pre id="modalContent" style="white-space: pre-wrap; font-size: 0.95rem; margin-top: 10px;"></pre>
 
-  <!-- 감정 선택 팝업 -->
-  <div id="emojiPicker" style="
-    display: none;
-    position: absolute;
-    bottom: 50px;
-    right: 0;
-    background: #1e1e1e;
-    padding: 8px 12px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  ">
-    <span onclick="selectEmoji('😡')">😡</span>
-    <span onclick="selectEmoji('😏')">😏</span>
-    <span onclick="selectEmoji('🥶')">🥶</span>
-    <span onclick="selectEmoji('🙏')">🙏</span>
-    <span onclick="selectEmoji('🤑')">🤑</span>
+      <div style="position: relative; margin-top: 20px; text-align: right;">
+        <div id="emojiDisplay"
+          style="font-size: 6rem; cursor: pointer; position: fixed; bottom: 40px; right: 20px; z-index: 99999;"
+          onmousedown="startHoldEmoji()" 
+          onmouseup="cancelHoldEmoji()" 
+          ontouchstart="startHoldEmoji()" 
+          ontouchend="cancelHoldEmoji()">🧐</div>
+
+        <div id="emojiPicker" style="display: none; position: absolute; bottom: 50px; right: 0; background: #1e1e1e; padding: 8px 12px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+          <span onclick="selectEmoji('😡')">😡</span>
+          <span onclick="selectEmoji('😏')">😏</span>
+          <span onclick="selectEmoji('🥶')">🥶</span>
+          <span onclick="selectEmoji('🙏')">🙏</span>
+          <span onclick="selectEmoji('🤑')">🤑</span>
+        </div>
+      </div>
+
+      <button onclick="closeModal()" style="margin-top: 20px; padding: 10px 20px; font-size: 1rem; background: #0077ff; color: white; border: none; border-radius: 6px;">닫기</button>
+    </div>
   </div>
-</div>
 
+  <!-- 스크립트 -->
+  <script>
+    setTimeout(() => {
+      document.getElementById('onboarding').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+    }, 1500);
 
-  <button onclick="closeModal()" style="margin-top: 20px; padding: 10px 20px; font-size: 1rem; background: #0077ff; color: white; border: none; border-radius: 6px;">닫기</button>
-</div>
-</div>
-
-
-<script>
-  // 온보딩 제거
-  setTimeout(() => {
-    document.getElementById('onboarding').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-  }, 1500);
-
-  // 전체화면 전환
-  function toggleFullScreen() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
-  }
-
-  // 메모 입력창 토글
-  function toggleMemoInput() {
-    const area = document.getElementById('memoInputArea');
-    area.style.display = area.style.display === 'block' ? 'none' : 'block';
-  }
-
-  // 메모 저장
-  function saveMemo() {
-    const get = (id) => document.getElementById(id)?.value || '';
-
-    const type = get('type');
-    const tableSize = get('tableSize');
-    const start = get('startTime');
-    const end = get('endTime');
-    const location = get('location');
-    const room = get('room');
-    const currency = get('currency');
-    const gameType = get('gameType');
-    const limit = get('limit');
-    const smallBlind = get('smallBlind');
-    const bigBlind = get('bigBlind');
-    const thirdBlind = get('thirdBlind');
-    const ante = get('ante');
-    const buyIn = get('buyIn');
-    const cashOut = get('cashOut');
-    const rebuys = get('rebuys');
-    const rebuyCost = get('rebuyCost');
-    const expenses = get('expenses');
-    const chipExpenses = get('chipExpenses');
-    const breaks = get('breaks');
-    const handsPerHour = get('handsPerHour');
-    const staking = get('staking');
-    const note = get('memoNote');
-    const tags = get('tags');
-
-    if (!note || !buyIn) {
-      alert("BUY-IN과 NOTE는 필수입니다!");
-      return;
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
     }
 
-    const now = new Date();
-    const formatted = `${now.getFullYear()}.${(now.getMonth()+1).toString().padStart(2,'0')}.${now.getDate().toString().padStart(2,'0')} ${now.toLocaleTimeString()}`;
+    function toggleMemoInput() {
+      const area = document.getElementById('memoInputArea');
+      area.style.display = area.style.display === 'block' ? 'none' : 'block';
+      resetForm();
+    }
 
-    const list = document.getElementById('memoList');
-    const empty = document.getElementById('emptyMessage');
+    function resetForm() {
+      document.getElementById('typeSelect').value = '';
+      document.getElementById('tournamentForm').style.display = 'none';
+      ['tDate', 'tName', 'tEntries', 'tRemaining', 'tITM', 'tBlind', 'tAntes', 'tStack'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
 
-    const div = document.createElement('div');
-    div.className = 'entry';
-    div.innerText = `📌 [${formatted}] – ${type}`;
+    function onTypeChosen() {
+      const selected = document.getElementById('typeSelect').value;
+      document.getElementById('tournamentForm').style.display = 'none';
 
-    const fullDetail = `
-📌 [${formatted}]
-🎮 TYPE: ${type} | 🪑 TABLE: ${tableSize}
-🏁 ${start} ~ ${end}
-📍 LOCATION: ${location} | 🏠 ROOM: ${room}
-💲 CURRENCY: ${currency} | GAME: ${gameType} (${limit})
-💸 BLINDS: ${smallBlind}/${bigBlind}${thirdBlind ? '/' + thirdBlind : ''} ANTE: ${ante}
-💰 BUY-IN: $${buyIn} | CASH-OUT: $${cashOut}
-♻️ REBUYS: ${rebuys} (TOTAL: $${rebuyCost})
-🧾 EXPENSES: $${expenses} | TIP: $${chipExpenses}
-⏱️ BREAKS: ${breaks}m | HPH: ${handsPerHour}
-🤝 STAKING: ${staking}
-📝 NOTE: ${note}
-🏷️ TAGS: ${tags}`.trim();
+      if (selected === 'tournament') {
+        document.getElementById('tournamentForm').style.display = 'block';
+      }
+    }
 
-    div.dataset.detail = fullDetail;
-    div.onclick = () => openModal(fullDetail);
+    function saveTournamentMemo() {
+      const get = (id) => document.getElementById(id)?.value || '';
 
-    addDeleteHandler(div);
-    list.prepend(div);
+      const date = get('tDate');
+      const name = get('tName');
+      const entries = get('tEntries');
+      const remaining = get('tRemaining');
+      const itm = get('tITM');
+      const blind = get('tBlind');
+      const antes = get('tAntes');
+      const stack = get('tStack');
 
-    if (empty) empty.remove();
-    toggleMemoInput();
-  }
-
-  // 상세 모달 열기
-  function openModal(content) {
-    document.getElementById('modalContent').innerText = content;
-    document.getElementById('detailModal').style.display = 'block';
-  }
-
-  function selectEmoji(emoji) {
-  alert(`오늘의 감정 선택: ${emoji}`);
-  // 추후: localStorage에 저장 or note에 추가 가능
-}
-  // 상세 모달 닫기
-  function closeModal() {
-    document.getElementById('detailModal').style.display = 'none';
-  }
-
-  // 삭제 기능 (우클릭 / 꾹누르기)
-  function addDeleteHandler(entry) {
-    entry.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      if (document.fullscreenElement) {
-        alert("전체화면에선 삭제 불가. 전체화면을 종료해 주세요.");
+      if (!date || !name || !entries || !remaining || !itm || !blind || !antes || !stack) {
+        alert("모든 항목을 입력해 주세요!");
         return;
       }
-      if (confirm("삭제할까요?")) {
-        entry.remove();
-        checkEmpty();
-      }
-    });
 
-    let timer;
-    entry.addEventListener('touchstart', () => {
-      timer = setTimeout(() => {
+      const now = new Date();
+      const formatted = `${now.getFullYear()}.${(now.getMonth() + 1).toString().padStart(2, '0')}.${now.getDate().toString().padStart(2, '0')} ${now.toLocaleTimeString()}`;
+
+      const fullDetail = `
+📌 [${formatted}]
+🏆 TOURNAMENT
+📅 Date: ${date}
+🎯 Name: ${name}
+👥 Entries: ${entries} | Remaining: ${remaining}%
+💰 ITM: ${itm}
+🪙 Blind Level: ${blind} | Antes: ${antes}
+🧱 Stack (BB): ${stack}`.trim();
+
+      const div = document.createElement('div');
+      div.className = 'entry';
+      div.innerText = `📌 [${formatted}] – Tournament`;
+      div.dataset.detail = fullDetail;
+      div.onclick = () => openModal(fullDetail);
+
+      addDeleteHandler(div);
+
+      const list = document.getElementById('memoList');
+      const empty = document.getElementById('emptyMessage');
+      list.prepend(div);
+      if (empty) empty.remove();
+
+      toggleMemoInput();
+    }
+
+    function openModal(content) {
+      document.getElementById('modalContent').innerText = content;
+      document.getElementById('detailModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').style.display = 'none';
+    }
+
+    function addDeleteHandler(entry) {
+      entry.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (document.fullscreenElement) {
+          alert("전체화면에선 삭제 불가. 전체화면을 종료해 주세요.");
+          return;
+        }
         if (confirm("삭제할까요?")) {
           entry.remove();
           checkEmpty();
         }
-      }, 800);
-    });
-    entry.addEventListener('touchend', () => clearTimeout(timer));
-  }
+      });
 
-  // 리스트 비었을 때 메시지 표시
-  function checkEmpty() {
-    const list = document.getElementById('memoList');
-    if (list.querySelectorAll('.entry').length === 0) {
-      const msg = document.createElement('div');
-      msg.id = 'emptyMessage';
-      msg.innerText = '메모가 없어요 🥲';
-      msg.style.textAlign = 'center';
-      msg.style.color = '#777';
-      msg.style.marginTop = '30px';
-      msg.style.fontSize = '1.1rem';
-      list.appendChild(msg);
+      let timer;
+      entry.addEventListener('touchstart', () => {
+        timer = setTimeout(() => {
+          if (confirm("삭제할까요?")) {
+            entry.remove();
+            checkEmpty();
+          }
+        }, 800);
+      });
+      entry.addEventListener('touchend', () => clearTimeout(timer));
     }
-  }
 
-  let holdTimer;
+    function checkEmpty() {
+      const list = document.getElementById('memoList');
+      if (list.querySelectorAll('.entry').length === 0) {
+        const msg = document.createElement('div');
+        msg.id = 'emptyMessage';
+        msg.innerText = '메모가 없어요 🥲';
+        msg.style.textAlign = 'center';
+        msg.style.color = '#777';
+        msg.style.marginTop = '30px';
+        msg.style.fontSize = '1.1rem';
+        list.appendChild(msg);
+      }
+    }
 
-// 꾹 누르기 시작
-function startHoldEmoji() {
-  holdTimer = setTimeout(() => {
-    document.getElementById('emojiPicker').style.display = 'block';
-  }, 600); // 0.6초 이상 눌러야 감정 선택 팝업 열림
-}
+    let holdTimer;
 
-// 꾹 누르기 취소
-function cancelHoldEmoji() {
-  clearTimeout(holdTimer);
-}
+    function startHoldEmoji() {
+      holdTimer = setTimeout(() => {
+        document.getElementById('emojiPicker').style.display = 'block';
+      }, 600);
+    }
 
-// 감정 선택 시 표시
-function selectEmoji(emoji) {
-  document.getElementById('emojiDisplay').innerText = emoji;
-  document.getElementById('emojiPicker').style.display = 'none';
-}
-</script>
+    function cancelHoldEmoji() {
+      clearTimeout(holdTimer);
+    }
 
-  
-  
-
+    function selectEmoji(emoji) {
+      document.getElementById('emojiDisplay').innerText = emoji;
+      document.getElementById('emojiPicker').style.display = 'none';
+    }
+  </script>
 </body>
 </html>
